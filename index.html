@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plate Image Upload</title>
+</head>
+<body>
+  <h1>Upload Plate Image</h1>
+  <input type="file" id="imageInput" accept="image/*">
+  <button onclick="uploadImage()">Upload</button>
+  <pre id="result"></pre>
+  <script>
+    async function uploadImage() {
+      const input = document.getElementById('imageInput');
+      const file = input.files[0];
+      if (!file) return alert("No file selected.");
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/plate-extract', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
