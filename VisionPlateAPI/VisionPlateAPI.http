@@ -1,0 +1,15 @@
+@VisionPlateAPI_HostAddress = http://localhost:5226
+
+GET {{VisionPlateAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+
+
+### Test GetRatingPlateInfo endpoint
+POST {{VisionPlateAPI_HostAddress}}/GetRatingPlateInfo
+
+Content-Type: multipart/form-data
+
+@image=./HVAC_Lennox.png

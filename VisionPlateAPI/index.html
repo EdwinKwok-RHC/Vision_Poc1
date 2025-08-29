@@ -1,0 +1,41 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plate Image Upload</title>
+</head>
+<body>
+    <h1>Upload Plate Image</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="uploadImage()">Upload</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function uploadImage() {
+            const input = document.getElementById('imageInput');
+            const file = input.files[0];
+            if (!file) return alert("No file selected.");
+
+            const formData = new FormData();
+            formData.append('image', file); // 👈 Must match the parameter name expected by the API
+
+            try {
+                const response = await fetch('http://localhost:5226/GetRatingPlateInfo', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('result').textContent = `Upload failed: ${err.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
