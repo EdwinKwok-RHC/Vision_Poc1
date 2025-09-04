@@ -37,11 +37,27 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
+app.UseStaticFiles(); // Enables serving static files like index.html from wwwroot
+
 
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
+
+#region Auto-redirect root to index.html
+//Changed to use launchSettings.json to set the launchUrl
+// Redirect root to index.html in development mode
+//app.MapGet("/", async context =>
+//{
+//#if DEBUG
+//    context.Response.Redirect("/index.html");
+//#else
+//    await context.Response.WriteAsync("API is running...");
+//#endif
+//});
+
+#endregion
 
 app.MapGet("/weatherforecast", () =>
 {
