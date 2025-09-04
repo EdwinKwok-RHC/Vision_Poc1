@@ -91,14 +91,25 @@ app.MapPost("/GetRatingPlateInfo", async (HttpRequest request) =>
         return Results.BadRequest("Unsupported file format.");
 
     // TODO: Process the image and extract RatingPlate info
+
+    //for demo purposes, we'll return a dummy RatingPlate based on filename
+    var brand = file.FileName switch
+    {
+        var name when name.Contains("Trane", StringComparison.OrdinalIgnoreCase) => "Trane",
+        var name when name.Contains("Carrier", StringComparison.OrdinalIgnoreCase) => "Carrier",
+        var name when name.Contains("Lennox", StringComparison.OrdinalIgnoreCase) => "Lennox",
+        _ => "Unknown"
+    };
     var ratingPlate = new RatingPlate
     {
 
-        Manufacturer = "VisionTech",
+        Manufacturer = brand,
         Model = "ABC",
         Serial = "123"
     };
 
+
+    //var ratingPlate = await service.ExtractRatingPlateInfoAsync(file);
     return Results.Ok(ratingPlate);
 })
 .Accepts<IFormFile>("multipart/form-data")
