@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Http.Features;
 using VisionPlateAPI.DTOs;
+using VisionPlateAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,14 @@ builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
 });
+
+builder.Services.AddScoped<IAiVisionRecognitionService>(provider =>
+    new AzureDIPlateRecognitionService(
+        endpoint: configuration["AzureDocumentIntelligence:Endpoint"],
+        apiKey: configuration["AzureDocumentIntelligence:ApiKey"],
+        customModelId: "HVAC"
+    ));
+
 
 var app = builder.Build();
 
