@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Http.Features;
 using VisionPlateAPI.DTOs;
+using VisionPlateAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,14 @@ builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
 });
+
+builder.Services.AddScoped<IAiVisionRecognitionService>(provider =>
+    new AzureDIPlateRecognitionService(
+        endpoint: "https://di-np-poc-ratingplate.cognitiveservices.azure.com/",
+        apiKey: "key",
+        customModelId: "HVAC"
+    ));
+
 
 var app = builder.Build();
 
@@ -73,6 +82,22 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
+
+app.MapPost("/analyze-plate", async (HttpRequest request, IAiVisionRecognitionService visionService) =>
+{
+    var form = await request.ReadFormAsync();
+    var imageFile = form.Files["image"];
+
+    if (imageFile == null || imageFile.Length == 0)
+        return Results.BadRequest("No image file provided");
+
+    using var stream = imageFile.OpenReadStream();
+    var result = await visionService.ExtractRatingPlateInfoAsync(stream);
+
+    return Results.Ok(result);
+});
+
+
 app.MapPost("/GetRatingPlateInfo", async (HttpRequest request) =>
 {
     if (!request.HasFormContentType)
@@ -104,8 +129,8 @@ app.MapPost("/GetRatingPlateInfo", async (HttpRequest request) =>
     {
 
         Manufacturer = brand,
-        Model = "ABC",
-        Serial = "123"
+        ModelNumber = "ABC",
+        SerialNumber = "123"
     };
 
 
