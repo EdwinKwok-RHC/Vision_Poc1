@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Core; // Required for RequestContent
 using Azure.AI.DocumentIntelligence;
 using VisionPlateAPI.DTOs;
 
@@ -20,16 +21,14 @@ public class AzureDIPlateRecognitionService : IAiVisionRecognitionService
     {
         try
         {
-            // Analyze document using custom model
-            var content = new AnalyzeDocumentContent()
-            {
-                Base64Source = BinaryData.FromStream(imageStream)
-            };
+            // Convert Stream to BinaryData
+            BinaryData binaryData = BinaryData.FromStream(imageStream);
 
-            Operation<AnalyzeResult> operation = await _client.AnalyzeDocumentAsync(
-                WaitUntil.Completed,
-                _customModelId,
-                content);
+            // Create AnalyzeDocumentOptions with custom model ID and BinaryData
+            AnalyzeDocumentOptions analyzeDocumentOptions = new AnalyzeDocumentOptions(_customModelId, binaryData);
+
+            // Analyze document using custom model
+            Operation<AnalyzeResult> operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, analyzeDocumentOptions);
 
             AnalyzeResult result = operation.Value;
 
@@ -41,6 +40,7 @@ public class AzureDIPlateRecognitionService : IAiVisionRecognitionService
         }
     }
 
+
     public async Task<RatingPlate> ExtractRatingPlateInfoAsync(byte[] imageBytes)
     {
         using var stream = new MemoryStream(imageBytes);
@@ -51,15 +51,11 @@ public class AzureDIPlateRecognitionService : IAiVisionRecognitionService
     {
         try
         {
-            var content = new AnalyzeDocumentContent()
-            {
-                UrlSource = new Uri(imageUrl)
-            };
-
+            // Use the correct overload: AnalyzeDocumentAsync(WaitUntil, string, Uri)
             Operation<AnalyzeResult> operation = await _client.AnalyzeDocumentAsync(
                 WaitUntil.Completed,
                 _customModelId,
-                content);
+                new Uri(imageUrl));
 
             AnalyzeResult result = operation.Value;
 
@@ -124,7 +120,7 @@ public class AzureDIPlateRecognitionService : IAiVisionRecognitionService
             //    }
             //    else if (currentField.FieldType == DocumentFieldType.Double)
             //    {
-            //        ratingPlate.Current = currentField.ValueDouble?.ToString();
+            //        ratingPlate.Current = currentField.ValueDouble?.ToString();.
             //    }
             //    ratingPlate.CurrentConfidence = currentField.Confidence ?? 0;
             //}
@@ -166,15 +162,10 @@ public class AzureDIPlateRecognitionService : IAiVisionRecognitionService
             //        ratingPlate.BTU = btuField.ValueDouble?.ToString();
             //    }
 
-            // Overall document confidence
-            // Replace this line:
-            // ratingPlate.OverallConfidence = document.Confidence ?? 0;
-            // With this line:
-            ratingPlate.OverallConfidence = document.Confidence;
             //    ratingPlate.BTUConfidence = btuField.Confidence ?? 0;
             //}
-
-
+            
+            ratingPlate.OverallConfidence = document.Confidence;
         }
 
         return ratingPlate;

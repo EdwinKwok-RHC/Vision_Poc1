@@ -29,8 +29,8 @@ builder.Services.Configure<FormOptions>(options =>
 
 builder.Services.AddScoped<IAiVisionRecognitionService>(provider =>
     new AzureDIPlateRecognitionService(
-        endpoint: configuration["AzureDocumentIntelligence:Endpoint"],
-        apiKey: configuration["AzureDocumentIntelligence:ApiKey"],
+        endpoint: "url",
+        apiKey: "key",
         customModelId: "HVAC"
     ));
 
@@ -113,8 +113,8 @@ app.MapPost("/GetRatingPlateInfo", async (HttpRequest request) =>
     {
 
         Manufacturer = brand,
-        Model = "ABC",
-        Serial = "123"
+        ModelNumber = "ABC",
+        SerialNumber = "123"
     };
 
 
