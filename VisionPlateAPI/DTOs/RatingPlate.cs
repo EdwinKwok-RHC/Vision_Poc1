@@ -3,16 +3,16 @@
 
 public class RatingPlate
 {
-    public string Manufacturer { get; set; }
+    public string? Manufacturer { get; set; }
     public double ManufacturerConfidence { get; set; }
     public string ManufacturerConfidenceRateText => $"{ManufacturerConfidence * 100:F2}%";
 
-    public string ModelNumber { get; set; }
+    public string? ModelNumber { get; set; }
     public double ModelNumberConfidence { get; set; }
     public string ModelNumberConfidenceRateText => $"{ModelNumberConfidence * 100:F2}%";
 
 
-    public string SerialNumber { get; set; }
+    public string? SerialNumber { get; set; }
     public double SerialNumberConfidence { get; set; }
     public string SerialNumberConfidenceRateText => $"{SerialNumberConfidence * 100:F2}%";
 

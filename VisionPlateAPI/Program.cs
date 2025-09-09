@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Http.Features;
 using VisionPlateAPI.DTOs;
 using VisionPlateAPI.Services;
+using VisionPlateAPI.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,12 +28,17 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
 });
 
-builder.Services.AddScoped<IAiVisionRecognitionService>(provider =>
-    new AzureDIPlateRecognitionService(
-        endpoint: "https://di-np-poc-ratingplate.cognitiveservices.azure.com/",
-        apiKey: "key",
-        customModelId: "HVAC"
-    ));
+builder.Services.AddOptions<AzureDIConfiguration>()
+    .Bind(builder.Configuration.GetSection(AzureDIConfiguration.SectionName))
+    .ValidateDataAnnotations();
+
+//builder.Services.AddHttpClient<IAiVisionRecognitionService, AzureDIPlateRecognitionService>();
+builder.Services.AddScoped<IAiVisionRecognitionService>(sp =>
+{
+    var config = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<AzureDIConfiguration>>().Value;
+    return new AzureDIPlateRecognitionService(config.Endpoint, config.ApiKey, config.CustomModelId);
+});
+
 
 
 var app = builder.Build();
