@@ -91,7 +91,24 @@ app.MapGet("/weatherforecast", () =>
 
 app.MapPost("/analyze-plate", async (HttpRequest request, IAiVisionRecognitionService visionService) =>
 {
-    var form = await request.ReadFormAsync();
+    RatingPlateResponseDto ToResponseDto(RatingPlate plate)
+    {
+        return new RatingPlateResponseDto
+        {
+            Manufacturer = plate.Manufacturer,
+            ManufacturerConfidenceRateText = plate.ManufacturerConfidenceRateText,
+
+            ModelNumber = plate.ModelNumber,
+            ModelNumberConfidenceRateText = plate.ModelNumberConfidenceRateText,
+
+            SerialNumber = plate.SerialNumber,
+            SerialNumberConfidenceRateText = plate.SerialNumberConfidenceRateText,
+
+            OverallConfidenceRateText = plate.OverallConfidenceRateText
+        };
+    }
+
+var form = await request.ReadFormAsync();
     var imageFile = form.Files["image"];
 
     if (imageFile == null || imageFile.Length == 0)
@@ -100,7 +117,8 @@ app.MapPost("/analyze-plate", async (HttpRequest request, IAiVisionRecognitionSe
     using var stream = imageFile.OpenReadStream();
     var result = await visionService.ExtractRatingPlateInfoAsync(stream);
 
-    return Results.Ok(result);
+    var responseDto = ToResponseDto(result);
+    return Results.Ok(responseDto);
 });
 
 
